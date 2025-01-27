@@ -6,4 +6,5 @@ module sewagesystem {
     exports pl.pwr.ite.dynak.gui;
     exports pl.pwr.ite.dynak.main;
     exports pl.pwr.ite.dynak.services;
+    exports pl.pwr.ite.dynak.utils;
 }
