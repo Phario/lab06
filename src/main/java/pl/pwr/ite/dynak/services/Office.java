@@ -5,6 +5,7 @@ import lombok.Setter;
 import pl.pwr.ite.dynak.services.interfaces.IOffice;
 import pl.pwr.ite.dynak.utils.InvalidMethodException;
 import pl.pwr.ite.dynak.utils.Method;
+import pl.pwr.ite.dynak.utils.TankerData;
 
 import java.util.ArrayList;
 
@@ -12,10 +13,10 @@ import java.util.ArrayList;
 @Setter
 public class Office extends SocketUser implements IOffice{
     private static int staticTankerId = 0;
-    private ArrayList<Tanker> tankers;
-    private ArrayList<Integer> readyTankerIds;
+    private ArrayList<TankerData> tankers;
     public Office(int port) {
         super(port);
+        tankers = new ArrayList<>();
     }
 
     @Override
@@ -30,20 +31,35 @@ public class Office extends SocketUser implements IOffice{
             default -> throw new InvalidMethodException();
         };
     }
-
     @Override
     public int register(String host, String port) {
-
+        tankers.add(new TankerData(staticTankerId, port, host, true));
         return staticTankerId++;
     }
 
     @Override
     public int order(String host, String port) {
+        //find available tanker
+        for (TankerData tanker : tankers) {
+            //send tanker on a job if it's ready
+            if (tanker.isReady()) {
+                sendRequest("sj:" + host + "," + port,tanker.getTankerHost(), Integer.parseInt(tanker.getTankerPort()));
+                //set its state to not ready
+                tanker.setReady(false);
+                //return 1 if successful
+                return 1;
+            }
+        }
         return 0;
     }
 
     @Override
     public void setReadyToServe(int number) {
-
+        for (TankerData tanker : tankers) {
+            if (tanker.getId() == number) {
+                tanker.setReady(true);
+                break;
+            }
+        }
     }
 }

@@ -46,16 +46,12 @@ public abstract class SocketUser {
             String methodName = parts[0];
             String params = parts[1];
             String[] methodParams = params.split(",");
-            if (methodName.equals("sj") || methodName.equals("r") || methodName.equals("o")) {
-                return new Method(methodName, methodParams[0], methodParams[1], null);
-            }
-            else if (methodName.equals("spi")) {
-                return new Method(methodName, null, methodParams[0], methodParams[1]);
-            }
-            else if (methodName.equals("gp") || methodName.equals("gs") || methodName.equals("sr") || methodName.equals("spo")) {
-                return new Method(methodName, null, methodParams[0], null);
-            }
-            else return null;
+            return switch (methodName) {
+                case "sj", "r", "o" -> new Method(methodName, methodParams[0], methodParams[1], null);
+                case "spi" -> new Method(methodName, null, methodParams[0], methodParams[1]);
+                case "gp", "gs", "sr", "spo" -> new Method(methodName, null, methodParams[0], null);
+                default -> null;
+            };
         }
         return null;
     }

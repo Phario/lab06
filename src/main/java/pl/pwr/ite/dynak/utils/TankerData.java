@@ -6,11 +6,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TankerData {
-    private final int tankerPort;
+    private final String tankerPort;
     private final String tankerHost;
     private final int id;
     private boolean isReady;
-    public TankerData(int tankerPort, String tankerHost, int id, boolean isReady) {
+    public TankerData(int id, String tankerPort, String tankerHost, boolean isReady) {
         this.tankerPort = tankerPort;
         this.tankerHost = tankerHost;
         this.id = id;
