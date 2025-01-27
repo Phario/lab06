@@ -9,12 +9,36 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public abstract class SocketUser {
     protected ServerSocket serverSocket;
     int port;
+    protected ExecutorService executor;
     protected SocketUser(int port) {
         this.port = port;
+    }
+    public void startListening() throws IOException {
+        serverSocket = new ServerSocket(port);
+        this.executor = Executors.newCachedThreadPool();
+        while (!Thread.currentThread().isInterrupted()) {
+            Socket socket = serverSocket.accept();
+            executor.submit(() -> respondToRequest(socket));
+        }
+    }
+    public void respondToRequest(Socket socket) {
+        try (BufferedReader inbound = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter outbound = new PrintWriter(socket.getOutputStream(), true)) {
+            String rawRequest = inbound.readLine();
+            Method request = parseRequest(rawRequest);
+            if (request != null) {
+                int response = handleRequest(request);
+                outbound.println(response);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     public Method parseRequest(String request) {
         if (request != null) {
@@ -47,5 +71,5 @@ public abstract class SocketUser {
         }
         return null;
     }
-    public abstract void handleRequest(Method method) throws InvalidMethodException;
+    protected abstract int handleRequest(Method method) throws InvalidMethodException;
 }

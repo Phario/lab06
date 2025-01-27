@@ -13,8 +13,8 @@ public class SewagePlant extends SocketUser implements ISewagePlant {
     }
 
     @Override
-    public void handleRequest(Method method) {
-
+    public int handleRequest(Method method) {
+        return 0;
     }
 
     @Override

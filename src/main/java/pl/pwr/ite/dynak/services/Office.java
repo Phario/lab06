@@ -3,6 +3,7 @@ package pl.pwr.ite.dynak.services;
 import lombok.Getter;
 import lombok.Setter;
 import pl.pwr.ite.dynak.services.interfaces.IOffice;
+import pl.pwr.ite.dynak.utils.InvalidMethodException;
 import pl.pwr.ite.dynak.utils.Method;
 
 import java.util.ArrayList;
@@ -18,8 +19,16 @@ public class Office extends SocketUser implements IOffice{
     }
 
     @Override
-    public void handleRequest(Method method) {
-
+    public int handleRequest(Method method) {
+        return switch (method.methodName()) {
+            case "r" -> register(method.host(), method.parameter());
+            case "o" -> order(method.host(), method.parameter());
+            case "sr" -> {
+                setReadyToServe(Integer.parseInt(method.parameter()));
+                yield 0;
+            }
+            default -> throw new InvalidMethodException();
+        };
     }
 
     @Override
