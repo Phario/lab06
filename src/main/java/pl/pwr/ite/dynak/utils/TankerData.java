@@ -10,6 +10,7 @@ public class TankerData {
     private final String tankerHost;
     private final int id;
     private boolean isReady;
+    private int totalSewageDroppedOff = 0;
     public TankerData(int id, String tankerPort, String tankerHost, boolean isReady) {
         this.tankerPort = tankerPort;
         this.tankerHost = tankerHost;

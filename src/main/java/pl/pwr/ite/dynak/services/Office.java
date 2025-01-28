@@ -14,9 +14,13 @@ import java.util.ArrayList;
 public class Office extends SocketUser implements IOffice{
     private static int staticTankerId = 0;
     private ArrayList<TankerData> tankers;
-    public Office(int port) {
+    private final int sewagePlantPort;
+    private final String sewagePlantHost;
+    public Office(int port, int sewagePlantPort, String sewagePlantHost) {
         super(port);
         tankers = new ArrayList<>();
+        this.sewagePlantPort = sewagePlantPort;
+        this.sewagePlantHost = sewagePlantHost;
     }
 
     @Override
