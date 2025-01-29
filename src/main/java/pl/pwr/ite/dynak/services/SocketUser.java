@@ -18,10 +18,11 @@ public abstract class SocketUser {
     protected ExecutorService executor;
     protected SocketUser(int port) {
         this.port = port;
+        this.executor = Executors.newCachedThreadPool();
     }
     public void startListening() throws IOException {
         serverSocket = new ServerSocket(port);
-        this.executor = Executors.newCachedThreadPool();
+        System.out.println("Server listening on port " + port);
         while (!Thread.currentThread().isInterrupted()) {
             Socket socket = serverSocket.accept();
             executor.submit(() -> respondToRequest(socket));

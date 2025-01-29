@@ -6,11 +6,14 @@ import pl.pwr.ite.dynak.services.interfaces.IHouse;
 import pl.pwr.ite.dynak.utils.InvalidMethodException;
 import pl.pwr.ite.dynak.utils.Method;
 
-import java.net.ServerSocket;
+import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Getter
 @Setter
-public class House extends SocketUser implements IHouse, Runnable{
+public class House extends SocketUser implements IHouse{
     private final int maxCapacity;
     private int sewageLevel;
     private final int officePort;
@@ -30,6 +33,7 @@ public class House extends SocketUser implements IHouse, Runnable{
     public int getPumpOut(int max) {
         if (max > sewageLevel) {
             try {
+                System.out.println("Sewage is getting pumped out");
                 return sewageLevel;
             }
             finally {
@@ -45,20 +49,27 @@ public class House extends SocketUser implements IHouse, Runnable{
         }
         else throw new InvalidMethodException();
     }
-    public void sendSewageAlert(ServerSocket serverSocket) {
-        sendRequest("o:" + serverSocket.getInetAddress().getHostAddress() + "," + port,officeHost,officePort);
+    public void sendSewageAlert() {
+        sendRequest("o:" + "localhost" + "," + port,officeHost,officePort);
+        System.out.println("Sending sewage alert");
     }
-    public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                raiseSewageLevel();
-                if (sewageLevel >= 0.75*maxCapacity) {
-                    sendSewageAlert(serverSocket);
-                }
-                Thread.sleep(tickSpeed);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+    public void startSimulation()
+    {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.scheduleAtFixedRate(() -> {
+            raiseSewageLevel();
+            System.out.println("Sewage raised to: " + sewageLevel);
+
+            if (sewageLevel >= maxCapacity/10) sendSewageAlert();
+
+        }, 0, tickSpeed, TimeUnit.MILLISECONDS);
+    }
+    public static void main(String[] args) throws IOException {
+        int officePort = 8765;
+        int housePort = 8767;
+        String universalHost = "localhost";
+        House house = new House(housePort, 30, officePort, universalHost, 100);
+        house.startSimulation();
+        house.startListening();
     }
 }

@@ -7,6 +7,7 @@ import pl.pwr.ite.dynak.utils.InvalidMethodException;
 import pl.pwr.ite.dynak.utils.Method;
 import pl.pwr.ite.dynak.utils.TankerData;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 @Getter
@@ -31,19 +32,38 @@ public class SewagePlant extends SocketUser implements ISewagePlant {
             default -> throw new InvalidMethodException();
         };
     }
-
     @Override
     public void setPumpIn(int number, int volume) {
-
+        updateTankerData(number, volume);
+        System.out.println("Tanker " + number + " pumped in " + volume);
     }
-
+    private synchronized void updateTankerData(int number, int volume) {
+        for (TankerData tankersData : tankerData) {
+            if (tankersData.getId() == number) {
+                tankersData.setTotalSewageDroppedOff(tankersData.getTotalSewageDroppedOff() + volume);
+                return;
+            }
+        }
+    }
     @Override
     public int getStatus(int number) {
+        for (TankerData tankersData : tankerData) {
+            if (tankersData.getId() == number) {
+                System.out.println("Getting status for tanker " + number);
+                return tankersData.getTotalSewageDroppedOff();
+            }
+        }
         return 0;
     }
 
     @Override
     public void setPayoff(int number) {
-
+        System.out.println("Setting payoff for tanker " + number);
+        updateTankerData(number, 0);
+    }
+    public static void main(String[] args) throws IOException {
+        int sewagePlantPort = 8766;
+        SewagePlant sewagePlant = new SewagePlant(sewagePlantPort);
+        sewagePlant.startListening();
     }
 }
